@@ -6,38 +6,30 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
-import { shorten } from "@/app/actions";
+import { getLinks } from "@/app/actions";
+import { Link as DubLink } from "dub/models/components";
 
 const initialState = {
-  shortLink: "",
-};
+  links: [],
+} as { links: DubLink[] };
 
 export default function CardForm() {
-  const [state, formAction] = useFormState(shorten, initialState);
+  // @ts-ignore
+  const [state, formAction] = useFormState(getLinks, initialState);
 
   return (
     <CardContent className="bg-gray-50 border-t border-gray-200">
       <form className="space-y-4" action={formAction}>
-        <div className="space-y-2">
-          <Label htmlFor="url">URL</Label>
-          <Input
-            id="url"
-            name="url"
-            placeholder="https://example.com"
-            required
-            type="url"
-          />
-        </div>
         <SubmitButton />
       </form>
-      {state.shortLink && (
-        <div className="mt-4 p-4 border border-gray-200 bg-white dark:border-gray-700 rounded">
-          <p className="text-blue-500 dark:text-blue-400 text-center">
-            <Link href={state.shortLink}>
-              {state.shortLink.replace(/^https?:\/\//, "")}
-            </Link>
-          </p>
-        </div>
+      {state.links.length > 0 ? (
+        state.links.map((link) => (
+          <div key={link.shortLink}>
+            <Link href={link.shortLink}>{link.shortLink}</Link>
+          </div>
+        ))
+      ) : (
+        <p>No links found</p>
       )}
     </CardContent>
   );
@@ -48,7 +40,7 @@ function SubmitButton() {
 
   return (
     <Button type="submit" className="w-full" aria-disabled={pending}>
-      {pending ? <LoadingCircle /> : "Generate Short Link"}
+      {pending ? <LoadingCircle /> : "Fetch Links"}
     </Button>
   );
 }
